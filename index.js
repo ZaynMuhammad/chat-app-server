@@ -20,6 +20,44 @@ const io = socketio(server, {
 
 })
 
+// io.on('connection', (socket) => {
+//     socket.on('join', ({ name, room }, callback) => {
+//         const { error, user } = addUser({ id: socket.id, name, room })
+
+//         if (error) return callback(error)
+
+//         socket.emit('message', { user: 'admin', text: `${user.name} welcome to the room ${user.room}` })
+//         socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${user.name} has joined`})
+
+//         socket.join(user.room)
+//         console.log('connected')
+
+//         io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) })
+
+//         callback()
+//     })
+
+//     socket.on('sendMessage', (message, callback) => {
+//         // Easy solution, better solution would be to attach id field to user obj
+//         if (socket.id === null)
+//             return
+
+//         const user = getUser(socket.id)
+
+//         io.to(user.room).emit('message', { user: user.name, text: message })
+//         io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) })
+
+//         callback()
+//     })
+
+//     io.on('disconnection', () => {
+//         const user = removeUser(socket.id)
+
+//         if (user)
+//             io.to(user.room).emit('message', { user: 'admin', text: `${user.name} has left the chat`})
+//     })
+// })
+
 io.on('connection', (socket) => {
     socket.on('join', ({ name, room }, callback) => {
         const { error, user } = addUser({ id: socket.id, name, room })
@@ -27,7 +65,7 @@ io.on('connection', (socket) => {
         if (error) return callback(error)
 
         socket.emit('message', { user: 'admin', text: `${user.name} welcome to the room ${user.room}` })
-        socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${user.name} has joined`})
+        socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${user.name} has joined` })
 
         socket.join(user.room)
 
@@ -37,11 +75,12 @@ io.on('connection', (socket) => {
     })
 
     socket.on('sendMessage', (message, callback) => {
-        // Easy solution, better solution would be to attach id field to user obj
-        if (socket.id === null)
-            return
-
         const user = getUser(socket.id)
+
+        if (!user) {
+            console.log(`No user found for id ${socket.id}`)
+            return
+        }
 
         io.to(user.room).emit('message', { user: user.name, text: message })
         io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) })
@@ -49,11 +88,11 @@ io.on('connection', (socket) => {
         callback()
     })
 
-    io.on('disconnection', () => {
+    socket.on('disconnect', () => {
         const user = removeUser(socket.id)
 
         if (user)
-            io.to(user.room).emit('message', { user: 'admin', text: `${user.name} has left the chat`})
+            io.to(user.room).emit('message', { user: 'admin', text: `${user.name} has left the chat` })
     })
 })
 
