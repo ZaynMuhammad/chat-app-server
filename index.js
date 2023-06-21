@@ -13,7 +13,7 @@ const app = express()
 const server = http.createServer(app)
 const io = socketio(server, {
     cors: {
-        origin: 'https://chat-app-zayn.netlify.app',
+        origin: 'https://main--chat-app-zayn.netlify.app',
         methods: ["GET", "POST"],
     }
 
