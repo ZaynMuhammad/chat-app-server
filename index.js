@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 5000
 const router = require('./router')
 
 const app = express()
+app.use(cors())
 const server = http.createServer(app)
 const io = socketio(server, {
     cors: {
@@ -57,6 +58,5 @@ io.on('connection', (socket) => {
 })
 
 app.use(router)
-app.use(cors())
 
 server.listen(PORT, () => console.log(`Server has started on port ${PORT}`))
